@@ -1,0 +1,39 @@
+:host {
+  display: block;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+}
+    .app-footer {
+      background: rgba(26, 26, 26, 0.9);
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 1.5rem 0;
+      margin-top: 3rem;
+      position: relative;
+    }
+
+    .footer-content {
+        margin: 0 auto;
+    padding: 0 1.5rem;
+    text-align: center;
+    background: #222020;
+    width: 100vw;
+    position: fixed;
+    bottom: 0;
+    z-index: 3;
+    }
+
+    .footer-text {
+      color: #6b7280;
+      font-size: 0.9rem;
+    }
+
+    .version-text {
+      color: #6b7280;
+      font-size: 0.9rem;
+      position: absolute;
+      right: 12px;
+      bottom: 0px;
+    }

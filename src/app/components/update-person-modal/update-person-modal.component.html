@@ -1,0 +1,74 @@
+<app-modal [isOpen]="isOpen" [title]="'Update Person'" (close)="onClose()">
+  <div *ngIf="person" class="update-content">
+    <div class="person-info">
+      <h3>{{ person.name }}</h3>
+      <div class="balance" [ngClass]="getBalanceClass()">
+        {{ getBalanceDisplay() }}
+      </div>
+    </div>
+
+    <form (ngSubmit)="onSubmit()" class="transaction-form">
+      <div class="form-group">
+        <label for="type">Transaction Type *</label>
+        <select
+          id="type"
+          name="type"
+          [(ngModel)]="formData.type"
+          required
+        >
+          <option value="they_paid_me">They Paid Me</option>
+          <option value="i_paid_them">I Paid Them</option>
+          <option value="they_owe_more">They Owe More</option>
+          <option value="i_owe_more">I Owe More</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="amount">Amount *</label>
+        <input
+          type="number"
+          id="amount"
+          name="amount"
+          [(ngModel)]="formData.amount"
+          min="0.01"
+          step="0.01"
+          required
+          placeholder="0.00"
+          [class.error]="errors['amount']"
+        />
+        <span class="error-message" *ngIf="errors['amount']">{{ errors['amount'] }}</span>
+      </div>
+
+      <div class="form-group">
+        <label for="note">Note (Optional)</label>
+        <textarea
+          id="note"
+          name="note"
+          [(ngModel)]="formData.note"
+          rows="3"
+          placeholder="Add an optional note"
+        ></textarea>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn btn-danger" (click)="onDeleteClick()">
+          Delete Person
+        </button>
+        <div class="right-actions">
+          <button type="button" class="btn btn-secondary" (click)="onClose()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Add Transaction</button>
+        </div>
+      </div>
+    </form>
+
+    <div class="delete-confirm" *ngIf="showDeleteConfirm">
+      <div class="confirm-content">
+        <p>Are you sure you want to delete this person and all their transactions?</p>
+        <div class="confirm-actions">
+          <button class="btn btn-secondary" (click)="cancelDelete()">Cancel</button>
+          <button class="btn btn-danger" (click)="confirmDelete()">Delete</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</app-modal>

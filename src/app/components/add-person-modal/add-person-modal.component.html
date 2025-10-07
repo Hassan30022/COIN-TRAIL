@@ -1,0 +1,65 @@
+<app-modal [isOpen]="isOpen" [title]="'Add New Person'" (close)="onClose()">
+  <form (ngSubmit)="onSubmit()" class="person-form">
+    <div class="form-group">
+      <label for="name">Name *</label>
+      <input
+        type="text"
+        id="name"
+        name="name"
+        [(ngModel)]="formData.name"
+        required
+        placeholder="Enter person's name"
+        [class.error]="errors['name']"
+      />
+      <span class="error-message" *ngIf="errors['name']">{{ errors['name'] }}</span>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="theyOweMe">They Owe Me</label>
+        <input
+          type="number"
+          id="theyOweMe"
+          name="theyOweMe"
+          [(ngModel)]="formData.theyOweMe"
+          min="0"
+          step="0.01"
+          placeholder="0.00"
+          [class.error]="errors['theyOweMe']"
+        />
+        <span class="error-message" *ngIf="errors['theyOweMe']">{{ errors['theyOweMe'] }}</span>
+      </div>
+
+      <div class="form-group">
+        <label for="iOweThem">I Owe Them</label>
+        <input
+          type="number"
+          id="iOweThem"
+          name="iOweThem"
+          [(ngModel)]="formData.iOweThem"
+          min="0"
+          step="0.01"
+          placeholder="0.00"
+          [class.error]="errors['iOweThem']"
+        />
+        <span class="error-message" *ngIf="errors['iOweThem']">{{ errors['iOweThem'] }}</span>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="note">Note (Optional)</label>
+      <textarea
+        id="note"
+        name="note"
+        [(ngModel)]="formData.note"
+        rows="3"
+        placeholder="Add an optional note"
+      ></textarea>
+    </div>
+
+    <div class="form-actions">
+      <button type="button" class="btn btn-secondary" (click)="onClose()">Cancel</button>
+      <button type="submit" class="btn btn-primary">Add Person</button>
+    </div>
+  </form>
+</app-modal>
