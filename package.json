@@ -6,7 +6,7 @@
     "start": "ng serve",
     "build": "ng build",
     "build:pages": "ng build --configuration production --base-href /COIN-TRAIL/",
-    "deploy": "npm run build:pages && npx angular-cli-ghpages --dir=dist/demo"
+    "deploy": "npm run build:pages && npx angular-cli-ghpages --dir=dist/demo/browser"
     
   },
   "dependencies": {
