@@ -13,14 +13,8 @@
   </div>
 
   <div class="search-sort">
-    <input
-      type="text"
-      class="search-input"
-      placeholder="Search by name..."
-      [(ngModel)]="searchTerm"
-      (input)="onSearchChange()"
-      aria-label="Search people by name"
-    />
+    <input type="text" class="search-input" placeholder="Search by name..." [(ngModel)]="searchTerm"
+      (input)="onSearchChange()" aria-label="Search people by name" />
   </div>
 
   <div class="table-container" *ngIf="filteredPersons.length > 0">
@@ -52,38 +46,31 @@
             </td>
             <td>{{ person.transactions.length }}</td>
             <td class="actions-cell">
-              <button
-                class="btn-icon"
-                (click)="onGeneratePersonReceipt(person)"
-                title="Generate Receipt"
-                [attr.aria-label]="'Generate receipt for ' + person.name"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <button class="btn-icon" (click)="onGeneratePersonReceipt(person)" title="Generate Receipt"
+                [attr.aria-label]="'Generate receipt for ' + person.name">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                   <polyline points="14 2 14 8 20 8"></polyline>
                   <line x1="16" y1="13" x2="8" y2="13"></line>
                   <line x1="16" y1="17" x2="8" y2="17"></line>
                 </svg>
               </button>
-              <button
-                class="btn-icon"
-                (click)="onUpdatePerson(person)"
-                title="Update Person"
-                [attr.aria-label]="'Update ' + person.name"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <button class="btn-icon" (click)="onUpdatePerson(person)" title="Update Person"
+                [attr.aria-label]="'Update ' + person.name">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                   <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                 </svg>
               </button>
-              <button
-                class="btn-icon"
-                (click)="toggleExpand(person.id)"
+              <button class="btn-icon" (click)="toggleExpand(person.id)"
                 [title]="isExpanded(person.id) ? 'Collapse' : 'Expand'"
                 [attr.aria-label]="(isExpanded(person.id) ? 'Collapse' : 'Expand') + ' transaction history for ' + person.name"
-                [attr.aria-expanded]="isExpanded(person.id)"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" [class.rotated]="isExpanded(person.id)">
+                [attr.aria-expanded]="isExpanded(person.id)">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                  [class.rotated]="isExpanded(person.id)">
                   <polyline points="6 9 12 15 18 9"></polyline>
                 </svg>
               </button>
@@ -92,11 +79,10 @@
           <tr *ngIf="isExpanded(person.id)" class="expanded-row">
             <td colspan="4">
               <div class="expanded-content">
-                <app-transaction-history
-                  [person]="person"
+                <app-transaction-history [person]="person"
                   (generateReceipt)="onGenerateTransactionReceipt(person, $event)"
                   (deleteTransaction)="onDeleteTransaction(person, $event)"
-                ></app-transaction-history>
+                  (clearTrail)="onClearTrail($event)"></app-transaction-history>
               </div>
             </td>
           </tr>
@@ -106,7 +92,8 @@
   </div>
 
   <div class="empty-state" *ngIf="filteredPersons.length === 0 && persons.length === 0">
-    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
       <line x1="12" y1="1" x2="12" y2="23"></line>
       <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
     </svg>
@@ -120,16 +107,9 @@
   </div>
 </div>
 
-<app-add-person-modal
-  [isOpen]="showAddModal"
-  (close)="showAddModal = false"
-  (submit)="onAddPersonSubmit($event)"
-></app-add-person-modal>
+<app-add-person-modal [isOpen]="showAddModal" (close)="showAddModal = false"
+  (submit)="onAddPersonSubmit($event)"></app-add-person-modal>
 
-<app-update-person-modal
-  [isOpen]="showUpdateModal"
-  [person]="selectedPerson"
-  (close)="showUpdateModal = false; selectedPerson = null"
-  (submit)="onUpdatePersonSubmit($event)"
-  (deletePerson)="onDeletePerson()"
-></app-update-person-modal>
+<app-update-person-modal [isOpen]="showUpdateModal" [person]="selectedPerson"
+  (close)="showUpdateModal = false; selectedPerson = null" (submit)="onUpdatePersonSubmit($event)"
+  (deletePerson)="onDeletePerson()"></app-update-person-modal>

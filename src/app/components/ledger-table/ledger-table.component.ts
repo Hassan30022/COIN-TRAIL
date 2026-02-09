@@ -41,7 +41,7 @@ export class LedgerTableComponent implements OnInit, OnDestroy {
   constructor(
     private ledgerService: LedgerService,
     private receiptService: ReceiptService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.subscription = this.ledgerService.persons$.subscribe(persons => {
@@ -167,7 +167,7 @@ export class LedgerTableComponent implements OnInit, OnDestroy {
       return `Total I owe: PKR ${Math.abs(total).toFixed(2) || 0}`;
     }
   }
-  
+
 
   getTotalBalanceClass(): string {
     return this.getTotalBalance() >= 0 ? 'positive' : 'negative';
@@ -176,5 +176,9 @@ export class LedgerTableComponent implements OnInit, OnDestroy {
   getSortIcon(field: SortField): string {
     if (this.sortField !== field) return '↕';
     return this.sortDirection === 'asc' ? '↑' : '↓';
+  }
+
+  onClearTrail(person: Person): void {
+    this.ledgerService.clearTransactions(person.id);
   }
 }

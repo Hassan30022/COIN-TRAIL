@@ -1,11 +1,12 @@
 .transaction-history {
-  margin-top: 16px;
+  margin-top: 10px;
 
   h4 {
-    margin: 0 0 12px 0;
+    margin: 0;
     color: var(--text);
     font-size: 16px;
     font-weight: 600;
+    align-content: center;
   }
 }
 
@@ -135,6 +136,10 @@
   justify-content: center;
   border-radius: 4px;
 
+  &.clear-confirm {
+    position: relative !important;
+  }
+
   .confirm-content {
     padding: 16px;
     text-align: center;
@@ -210,4 +215,10 @@
     align-items: flex-start;
     gap: 4px;
   }
+}
+
+.title-wrapper {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0px;
 }

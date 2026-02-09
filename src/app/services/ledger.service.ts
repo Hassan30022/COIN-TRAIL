@@ -48,39 +48,39 @@ export class LedgerService {
     return this.personsSubject.value.find(p => p.id === id);
   }
 
-addPerson(data: PersonFormData): Person | null {
-  if (!data || !data.name?.trim()) {
-    console.warn('Attempted to add invalid person record:', data);
-    return null;
+  addPerson(data: PersonFormData): Person | null {
+    if (!data || !data.name?.trim()) {
+      console.warn('Attempted to add invalid person record:', data);
+      return null;
+    }
+
+    const theyOweMe = Number(data.theyOweMe) || 0;
+    const iOweThem = Number(data.iOweThem) || 0;
+    const netBalance = theyOweMe - iOweThem;
+
+    const transaction: Transaction | null = netBalance !== 0 ? {
+      id: this.generateId(),
+      type: netBalance >= 0 ? 'they_owe_more' : 'i_owe_more',
+      amount: Math.abs(netBalance),
+      note: data.note || `Initial balance: They owe me ${theyOweMe}, I owe them ${iOweThem}`,
+      timestamp: new Date(),
+      balanceAfter: netBalance
+    } : null;
+
+    const person: Person = {
+      id: this.generateId(),
+      name: data.name.trim(),
+      balance: netBalance,
+      transactions: transaction ? [transaction] : [],
+      createdAt: new Date()
+    };
+
+    const persons = this.getPersons();
+    persons.push(person);
+    this.saveToStorage(persons);
+
+    return person;
   }
-
-  const theyOweMe = Number(data.theyOweMe) || 0;
-  const iOweThem = Number(data.iOweThem) || 0;
-  const netBalance = theyOweMe - iOweThem;
-
-  const transaction: Transaction | null = netBalance !== 0 ? {
-    id: this.generateId(),
-    type: netBalance >= 0 ? 'they_owe_more' : 'i_owe_more',
-    amount: Math.abs(netBalance),
-    note: data.note || `Initial balance: They owe me ${theyOweMe}, I owe them ${iOweThem}`,
-    timestamp: new Date(),
-    balanceAfter: netBalance
-  } : null;
-
-  const person: Person = {
-    id: this.generateId(),
-    name: data.name.trim(),
-    balance: netBalance,
-    transactions: transaction ? [transaction] : [],
-    createdAt: new Date()
-  };
-
-  const persons = this.getPersons();
-  persons.push(person);
-  this.saveToStorage(persons);
-
-  return person;
-}
 
 
   addTransaction(personId: string, data: TransactionFormData): void {
@@ -172,5 +172,19 @@ addPerson(data: PersonFormData): Person | null {
 
   private generateId(): string {
     return `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  }
+
+  clearTransactions(personId: string): void {
+    const persons = this.getPersons();
+    const person = persons.find(p => p.id === personId);
+
+    if (!person) {
+      throw new Error('Person not found');
+    }
+
+    person.transactions = [];
+    person.balance = 0;
+
+    this.saveToStorage(persons);
   }
 }

@@ -12,8 +12,10 @@ export class TransactionHistoryComponent {
   @Input() person: Person | null = null;
   @Output() generateReceipt = new EventEmitter<Transaction>();
   @Output() deleteTransaction = new EventEmitter<Transaction>();
+  @Output() clearTrail = new EventEmitter<Person>();
 
   showDeleteConfirm: string | null = null;
+  showClearTrailConfirm: boolean = false;
 
   getTransactionTypeText(type: string): string {
     switch (type) {
@@ -52,5 +54,18 @@ export class TransactionHistoryComponent {
 
   cancelDelete(): void {
     this.showDeleteConfirm = null;
+  }
+
+  onClearTrail() {
+    this.showClearTrailConfirm = true
+  }
+
+  confirmClear(person: Person) {
+    this.clearTrail.emit(person);
+    this.showClearTrailConfirm = false;
+  }
+
+  cancelClear() {
+    this.showClearTrailConfirm = false;
   }
 }
