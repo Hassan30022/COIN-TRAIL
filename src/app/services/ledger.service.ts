@@ -35,7 +35,7 @@ export class LedgerService {
     }
   }
 
-  private saveToStorage(persons: Person[]): void {
+  public saveToStorage(persons: Person[]): void {
     localStorage.setItem(this.STORAGE_KEY, JSON.stringify(persons));
     this.personsSubject.next(persons);
   }

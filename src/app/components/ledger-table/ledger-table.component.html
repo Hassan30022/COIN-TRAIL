@@ -6,10 +6,20 @@
         {{ getTotalBalanceDisplay() }}
       </div>
     </div>
-    <button class="btn btn-primary" (click)="onAddPerson()">
-      <span class="btn-icon">+</span>
-      Add Person / New Entry
-    </button>
+
+    <div style="display: flex; gap: 8px;">
+      <button class="btn btn-primary" (click)="jsonInput.click()">
+        Import
+      </button>
+      <input style="display: hidden;" type="file" accept=".json" hidden #jsonInput (change)="onImport($event)" />
+      <button class="btn btn-primary" (click)="onExport()">
+        Export
+      </button>
+      <button class="btn btn-primary" (click)="onAddPerson()">
+        <span class="btn-icon">+</span>
+        Add Person / New Entry
+      </button>
+    </div>
   </div>
 
   <div class="search-sort">

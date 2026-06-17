@@ -181,4 +181,83 @@ export class LedgerTableComponent implements OnInit, OnDestroy {
   onClearTrail(person: Person): void {
     this.ledgerService.clearTransactions(person.id);
   }
+
+  onImport(event: Event){
+  const input = event.target as HTMLInputElement;
+
+  if (!input.files || input.files.length === 0) {
+    return;
+  }
+
+  const file = input.files[0];
+  const reader = new FileReader();
+
+  reader.onload = () => {
+    try {
+      const jsonText = reader.result as string;
+      const importedPersons = JSON.parse(jsonText);
+
+      if (!Array.isArray(importedPersons)) {
+        alert('Invalid file format');
+        return;
+      }
+
+      const cleanedPersons = importedPersons.map((person: any) => ({
+        id: person.id || `${Date.now()}_${Math.random().toString(36).slice(2)}`,
+        name: person.name || '',
+        balance: Number(person.balance || 0),
+        transactions: Array.isArray(person.transactions)
+          ? person.transactions
+          : [],
+        createdAt: person.createdAt
+          ? new Date(person.createdAt)
+          : new Date()
+      }));
+
+      this.persons = cleanedPersons;
+
+      this.ledgerService.saveToStorage(cleanedPersons);
+
+      this.applyFiltersAndSort();
+
+      alert('Backup imported successfully');
+    } catch (error) {
+      console.error(error);
+      alert('Invalid JSON file');
+    } finally {
+      input.value = '';
+    }
+  };
+
+  reader.readAsText(file);
+  }
+
+  onExport() {
+      if (!this.persons || this.persons.length === 0) {
+    alert('No persons available to export');
+    return;
+  }
+
+  const exportData = this.persons.map(person => ({
+    ...person,
+    createdAt: person.createdAt instanceof Date
+      ? person.createdAt.toISOString()
+      : new Date(person.createdAt).toISOString()
+  }));
+
+  const jsonContent = JSON.stringify(exportData, null, 2);
+
+  const blob = new Blob([jsonContent], {
+    type: 'application/json'
+  });
+
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+
+  link.href = url;
+  link.download = `ledger-backup-${new Date().getTime()}.json`;
+  link.click();
+
+  URL.revokeObjectURL(url);
+  }
 }
