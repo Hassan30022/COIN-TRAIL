@@ -7,7 +7,6 @@
     "build": "ng build",
     "build:pages": "ng build --configuration production --base-href /COIN-TRAIL/",
     "deploy": "npm run build:pages && npx angular-cli-ghpages --dir=dist/demo/browser"
-    
   },
   "dependencies": {
     "@angular/animations": "^20.0.0",
@@ -17,7 +16,11 @@
     "@angular/forms": "^20.0.0",
     "@angular/platform-browser": "^20.0.0",
     "@angular/router": "^20.0.0",
+    "@firebase/app": "0.14.9",
+    "@firebase/auth": "1.12.1",
+    "@firebase/database": "1.1.1",
     "rxjs": "^7.8.1",
+    "sweetalert2": "^11.26.25",
     "tslib": "^2.5.0",
     "zone.js": "~0.15.0"
   },

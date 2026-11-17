@@ -46,7 +46,6 @@ export class UpdatePersonModalComponent implements OnChanges {
     }
 
     this.submit.emit({ ...this.formData });
-    this.resetForm();
   }
 
   onDeleteClick(): void {

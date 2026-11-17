@@ -56,6 +56,54 @@ input[type=number] {
   outline-offset: 2px;
 }
 
+.swal2-popup.coin-trail-sign-out-dialog {
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid #3d4945;
+  border-radius: 1rem;
+  box-shadow: 0 20px 64px #0008;
+}
+
+.coin-trail-sign-out-dialog .swal2-title {
+  font-size: 1.5rem;
+}
+
+.coin-trail-sign-out-dialog .swal2-html-container {
+  color: #b5bcb9;
+  font-size: 0.95rem;
+}
+
+.coin-trail-sign-out-dialog .swal2-actions {
+  gap: 0.625rem;
+}
+
+.coin-trail-sign-out-dialog .swal2-actions button {
+  min-height: 44px;
+  padding: 0.625rem 1rem;
+  border: 1px solid transparent;
+  border-radius: 0.625rem;
+  font-weight: 600;
+}
+
+.coin-trail-sign-out-dialog .coin-trail-sign-out-cancel {
+  background: var(--surface);
+  border-color: #3d4945;
+  color: var(--text);
+}
+
+.coin-trail-sign-out-dialog .coin-trail-sign-out-cancel:hover {
+  border-color: #b5bcb9;
+}
+
+.coin-trail-sign-out-dialog .coin-trail-sign-out-confirm {
+  background: var(--accent);
+  color: var(--background);
+}
+
+.coin-trail-sign-out-dialog .coin-trail-sign-out-confirm:hover {
+  background: var(--accent-hover);
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

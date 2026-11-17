@@ -1,0 +1,17 @@
+{
+  "rules": {
+    "coinTrail": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid && auth.token.firebase.sign_in_provider === 'google.com'",
+        ".write": "auth != null && auth.uid === $uid && auth.token.firebase.sign_in_provider === 'google.com' && newData.exists()",
+        ".validate": "newData.hasChildren(['version', 'ledger'])",
+        "version": { ".validate": "newData.isString() && newData.val().length === 36" },
+        "ledger": { ".validate": "newData.isString()" },
+        "imports": {
+          "$digest": { ".validate": "newData.val() === true" }
+        },
+        "$other": { ".validate": false }
+      }
+    }
+  }
+}

@@ -6,6 +6,95 @@
   justify-content: space-between;
 
 }
+
+.ledger-surface {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-inline-size: 0;
+}
+
+.account-bar,
+.account-status {
+  width: min(100% - 3rem, 1352px);
+  margin: 0.75rem auto;
+}
+
+.account-bar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin-block: 0;
+  padding-block: 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.account-label,
+.account-status {
+  color: #b5bcb9;
+  font-size: 0.875rem;
+  overflow-wrap: anywhere;
+}
+
+.account-error {
+  color: var(--error);
+}
+
+.account-status button {
+  padding: 0.5rem 0.9rem;
+  border: 1px solid #3d4945;
+  border-radius: 0.5rem;
+  background: var(--surface);
+  color: var(--text);
+}
+
+.account-sign-out {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  padding-inline: 1rem;
+  border: 1px solid #3d4945;
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.875rem;
+  font-weight: 600;
+  white-space: nowrap;
+
+  &:hover:enabled {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+}
+
+.account-bar button:disabled {
+  cursor: wait;
+  opacity: 0.6;
+}
+
+.google-sign-in {
+  flex: none;
+  width: 177px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: url('./google-sign-in.png') center / 177px 40px no-repeat;
+}
+
+.google-sign-in:hover:enabled {
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.08);
+}
+
+@media (max-width: 480px) {
+  .account-bar {
+    justify-content: space-between;
+  }
+}
     .app-footer {
       background: rgba(26, 26, 26, 0.9);
       border-top: 1px solid rgba(255, 255, 255, 0.1);

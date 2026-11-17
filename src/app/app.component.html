@@ -1,10 +1,54 @@
-<app-ledger-table></app-ledger-table>
+<main>
+  @if (storage.configured) {
+    <div class="account-bar" aria-label="Account">
+      @if (storage.account(); as account) {
+        <span class="account-label">{{ account.email || account.displayName || 'Google account' }}</span>
+        <button class="account-sign-out" type="button" (click)="confirmSignOut()" [disabled]="storage.busy()">
+          <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M10 17l5-5-5-5m5 5H3m9-8h6a3 3 0 0 1 3 3v10a3 3 0 0 1-3 3h-6"></path>
+          </svg>
+          Sign out
+        </button>
+      } @else if (storage.ready()) {
+        <span class="account-label" id="google-sign-in-description">Sign in to sync this browser’s ledger.</span>
+        <button
+          class="google-sign-in"
+          type="button"
+          aria-label="Sign in with Google"
+          aria-describedby="google-sign-in-description"
+          [attr.aria-busy]="storage.busy()"
+          [disabled]="storage.busy()"
+          (click)="storage.login()">
+        </button>
+      }
+    </div>
+  }
+
+  @if (storage.status(); as status) {
+    <p class="account-status" role="status">{{ status }}</p>
+  }
+  @if (storage.error(); as error) {
+    <div class="account-status account-error" role="alert">
+      {{ error }}
+      @if (storage.account() && !storage.ready()) {
+        <button type="button" (click)="storage.retry()">Retry</button>
+      }
+    </div>
+  }
+
+  @if (storage.ready()) {
+    <fieldset class="ledger-surface" [disabled]="storage.busy()" aria-label="Coin Trail ledger">
+      <app-ledger-table></app-ledger-table>
+    </fieldset>
+  }
+</main>
 
 <div class="footer-content">
     <p class="footer-text">
         Built with ❤️ by M. Hassan Asghar
     </p>
     <p class="version-text">
-        version: 17.06.0.03 | 2026
+        version: 17.11.0.03 | 2026
     </p>
 </div>

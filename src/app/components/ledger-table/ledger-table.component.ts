@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { LedgerService } from '../../services/ledger.service';
 import { ReceiptService } from '../../services/receipt.service';
+import { readBackup } from '../../services/ledger-data';
 import { Person, PersonFormData, TransactionFormData, Transaction } from '../../models/person.model';
 import { AddPersonModalComponent } from '../add-person-modal/add-person-modal.component';
 import { UpdatePersonModalComponent } from '../update-person-modal/update-person-modal.component';
@@ -35,8 +36,11 @@ export class LedgerTableComponent implements OnInit, OnDestroy {
   showAddModal = false;
   showUpdateModal = false;
   selectedPerson: Person | null = null;
+  sharingReceipt = false;
+  receiptNotice = '';
 
   private subscription?: Subscription;
+  private destroyed = false;
 
   constructor(
     private ledgerService: LedgerService,
@@ -51,6 +55,7 @@ export class LedgerTableComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.destroyed = true;
     this.subscription?.unsubscribe();
   }
 
@@ -62,9 +67,8 @@ export class LedgerTableComponent implements OnInit, OnDestroy {
     this.showAddModal = true;
   }
 
-  onAddPersonSubmit(data: PersonFormData): void {
-    this.ledgerService.addPerson(data);
-    this.showAddModal = false;
+  async onAddPersonSubmit(data: PersonFormData): Promise<void> {
+    if (await this.save(() => this.ledgerService.addPerson(data))) this.showAddModal = false;
   }
 
   onUpdatePerson(person: Person): void {
@@ -72,18 +76,17 @@ export class LedgerTableComponent implements OnInit, OnDestroy {
     this.showUpdateModal = true;
   }
 
-  onUpdatePersonSubmit(data: TransactionFormData): void {
-    if (this.selectedPerson) {
-      this.ledgerService.addTransaction(this.selectedPerson.id, data);
+  async onUpdatePersonSubmit(data: TransactionFormData): Promise<void> {
+    const personId = this.selectedPerson?.id;
+    if (personId && await this.save(() => this.ledgerService.addTransaction(personId, data))) {
       this.showUpdateModal = false;
       this.selectedPerson = null;
     }
   }
 
-  onDeletePerson(): void {
-    if (this.selectedPerson) {
-      const personId = this.selectedPerson.id;
-      this.ledgerService.deletePerson(personId);
+  async onDeletePerson(): Promise<void> {
+    const personId = this.selectedPerson?.id;
+    if (personId && await this.save(() => this.ledgerService.deletePerson(personId))) {
       this.showUpdateModal = false;
       this.selectedPerson = null;
       if (this.expandedPersonId === personId) {
@@ -92,16 +95,29 @@ export class LedgerTableComponent implements OnInit, OnDestroy {
     }
   }
 
-  onGeneratePersonReceipt(person: Person): void {
-    this.receiptService.generatePersonReceipt(person);
-  }
-
-  onGenerateTransactionReceipt(person: Person, transaction: Transaction): void {
-    this.receiptService.generateTransactionReceipt(person, transaction);
+  async onReceipt(person: Person, transaction?: Transaction, share = false): Promise<void> {
+    if (share && this.sharingReceipt) return;
+    if (share) this.sharingReceipt = true;
+    this.receiptNotice = '';
+    try {
+      const file = transaction
+        ? await this.receiptService.createTransactionReceipt(person, transaction)
+        : await this.receiptService.createPersonReceipt(person);
+      if (this.destroyed) return;
+      if (!share) {
+        this.receiptService.download(file);
+      } else if (await this.receiptService.share(file) === 'downloaded') {
+        this.receiptNotice = 'Direct sharing is unavailable. Attach the downloaded PNG in your app.';
+      }
+    } catch {
+      this.receiptNotice = 'Could not create the receipt. Please try again.';
+    } finally {
+      if (share) this.sharingReceipt = false;
+    }
   }
 
   onDeleteTransaction(person: Person, transaction: Transaction): void {
-    this.ledgerService.deleteTransaction(person.id, transaction.id);
+    void this.save(() => this.ledgerService.deleteTransaction(person.id, transaction.id));
   }
 
   toggleExpand(personId: string): void {
@@ -179,57 +195,32 @@ export class LedgerTableComponent implements OnInit, OnDestroy {
   }
 
   onClearTrail(person: Person): void {
-    this.ledgerService.clearTransactions(person.id);
+    void this.save(() => this.ledgerService.clearTransactions(person.id));
   }
 
-  onImport(event: Event){
-  const input = event.target as HTMLInputElement;
-
-  if (!input.files || input.files.length === 0) {
-    return;
-  }
-
-  const file = input.files[0];
-  const reader = new FileReader();
-
-  reader.onload = () => {
+  private async save(operation: () => Promise<unknown>): Promise<boolean> {
     try {
-      const jsonText = reader.result as string;
-      const importedPersons = JSON.parse(jsonText);
-
-      if (!Array.isArray(importedPersons)) {
-        alert('Invalid file format');
-        return;
-      }
-
-      const cleanedPersons = importedPersons.map((person: any) => ({
-        id: person.id || `${Date.now()}_${Math.random().toString(36).slice(2)}`,
-        name: person.name || '',
-        balance: Number(person.balance || 0),
-        transactions: Array.isArray(person.transactions)
-          ? person.transactions
-          : [],
-        createdAt: person.createdAt
-          ? new Date(person.createdAt)
-          : new Date()
-      }));
-
-      this.persons = cleanedPersons;
-
-      this.ledgerService.saveToStorage(cleanedPersons);
-
-      this.applyFiltersAndSort();
-
-      alert('Backup imported successfully');
+      await operation();
+      return true;
     } catch (error) {
-      console.error(error);
-      alert('Invalid JSON file');
+      if (!this.destroyed) alert(error instanceof Error ? error.message : 'Could not save the ledger.');
+      return false;
+    }
+  }
+
+  async onImport(event: Event): Promise<void> {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+    try {
+      const persons = readBackup(await file.text());
+      if (this.destroyed) return;
+      if (await this.save(() => this.ledgerService.saveToStorage(persons))) alert('Backup imported successfully');
+    } catch (error) {
+      if (!this.destroyed) alert(error instanceof Error ? error.message : 'Invalid backup file.');
     } finally {
       input.value = '';
     }
-  };
-
-  reader.readAsText(file);
   }
 
   onExport() {

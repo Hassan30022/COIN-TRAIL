@@ -1,54 +1,25 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { LedgerStorageService } from './ledger-storage.service';
+import { recalculateBalances, transactionDelta } from './ledger-data';
 import { Person, Transaction, PersonFormData, TransactionFormData } from '../models/person.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class LedgerService {
-  private readonly STORAGE_KEY = 'ledger_data';
-  private personsSubject = new BehaviorSubject<Person[]>([]);
-  public persons$: Observable<Person[]> = this.personsSubject.asObservable();
+  readonly persons$ = this.storage.persons.asObservable();
 
-  constructor() {
-    this.loadFromStorage();
-  }
+  constructor(private storage: LedgerStorageService) {}
 
-  private loadFromStorage(): void {
-    const stored = localStorage.getItem(this.STORAGE_KEY);
-    if (stored) {
-      try {
-        const data = JSON.parse(stored);
-        const persons = data.map((p: any) => ({
-          ...p,
-          createdAt: new Date(p.createdAt),
-          transactions: p.transactions.map((t: any) => ({
-            ...t,
-            timestamp: new Date(t.timestamp)
-          }))
-        }));
-        this.personsSubject.next(persons);
-      } catch (e) {
-        console.error('Failed to load data from storage', e);
-        this.personsSubject.next([]);
-      }
-    }
-  }
-
-  public saveToStorage(persons: Person[]): void {
-    localStorage.setItem(this.STORAGE_KEY, JSON.stringify(persons));
-    this.personsSubject.next(persons);
+  saveToStorage(persons: Person[]): Promise<void> {
+    return this.storage.save(persons);
   }
 
   getPersons(): Person[] {
-    return this.personsSubject.value;
+    return this.storage.persons.value;
   }
 
-  getPerson(id: string): Person | undefined {
-    return this.personsSubject.value.find(p => p.id === id);
-  }
-
-  addPerson(data: PersonFormData): Person | null {
+  async addPerson(data: PersonFormData): Promise<Person | null> {
     if (!data || !data.name?.trim()) {
       console.warn('Attempted to add invalid person record:', data);
       return null;
@@ -75,39 +46,23 @@ export class LedgerService {
       createdAt: new Date()
     };
 
-    const persons = this.getPersons();
+    const persons = structuredClone(this.getPersons());
     persons.push(person);
-    this.saveToStorage(persons);
+    await this.saveToStorage(persons);
 
     return person;
   }
 
 
-  addTransaction(personId: string, data: TransactionFormData): void {
-    const persons = this.getPersons();
+  async addTransaction(personId: string, data: TransactionFormData): Promise<void> {
+    const persons = structuredClone(this.getPersons());
     const person = persons.find(p => p.id === personId);
 
     if (!person) {
       throw new Error('Person not found');
     }
 
-    let balanceChange = 0;
-    switch (data.type) {
-      case 'they_paid_me':
-        balanceChange = -data.amount;
-        break;
-      case 'i_paid_them':
-        balanceChange = data.amount;
-        break;
-      case 'they_owe_more':
-        balanceChange = data.amount;
-        break;
-      case 'i_owe_more':
-        balanceChange = -data.amount;
-        break;
-    }
-
-    person.balance += balanceChange;
+    person.balance += transactionDelta(data);
 
     const transaction: Transaction = {
       id: this.generateId(),
@@ -119,16 +74,16 @@ export class LedgerService {
     };
 
     person.transactions.push(transaction);
-    this.saveToStorage(persons);
+    await this.saveToStorage(persons);
   }
 
-  deletePerson(personId: string): void {
+  async deletePerson(personId: string): Promise<void> {
     const persons = this.getPersons().filter(p => p.id !== personId);
-    this.saveToStorage(persons);
+    await this.saveToStorage(persons);
   }
 
-  deleteTransaction(personId: string, transactionId: string): void {
-    const persons = this.getPersons();
+  async deleteTransaction(personId: string, transactionId: string): Promise<void> {
+    const persons = structuredClone(this.getPersons());
     const person = persons.find(p => p.id === personId);
 
     if (!person) {
@@ -142,28 +97,9 @@ export class LedgerService {
 
     person.transactions.splice(transactionIndex, 1);
 
-    person.balance = 0;
-    person.transactions.forEach(t => {
-      let balanceChange = 0;
-      switch (t.type) {
-        case 'they_paid_me':
-          balanceChange = -t.amount;
-          break;
-        case 'i_paid_them':
-          balanceChange = t.amount;
-          break;
-        case 'they_owe_more':
-          balanceChange = t.amount;
-          break;
-        case 'i_owe_more':
-          balanceChange = -t.amount;
-          break;
-      }
-      person.balance += balanceChange;
-      t.balanceAfter = person.balance;
-    });
+    recalculateBalances(person);
 
-    this.saveToStorage(persons);
+    await this.saveToStorage(persons);
   }
 
   getTotalBalance(): number {
@@ -171,11 +107,11 @@ export class LedgerService {
   }
 
   private generateId(): string {
-    return `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return crypto.randomUUID();
   }
 
-  clearTransactions(personId: string): void {
-    const persons = this.getPersons();
+  async clearTransactions(personId: string): Promise<void> {
+    const persons = structuredClone(this.getPersons());
     const person = persons.find(p => p.id === personId);
 
     if (!person) {
@@ -185,6 +121,6 @@ export class LedgerService {
     person.transactions = [];
     person.balance = 0;
 
-    this.saveToStorage(persons);
+    await this.saveToStorage(persons);
   }
 }

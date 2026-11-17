@@ -10,7 +10,9 @@ import { Person, Transaction } from '../../models/person.model';
 })
 export class TransactionHistoryComponent {
   @Input() person: Person | null = null;
+  @Input() sharingReceipt = false;
   @Output() generateReceipt = new EventEmitter<Transaction>();
+  @Output() shareReceipt = new EventEmitter<Transaction>();
   @Output() deleteTransaction = new EventEmitter<Transaction>();
   @Output() clearTrail = new EventEmitter<Person>();
 

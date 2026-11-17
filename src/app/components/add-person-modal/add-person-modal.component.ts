@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PersonFormData } from '../../models/person.model';
@@ -10,7 +10,7 @@ import { ModalComponent } from '../modal/modal.component';
   styleUrls: ['./add-person-modal.component.scss'],
   imports: [CommonModule, FormsModule, ModalComponent]
 })
-export class AddPersonModalComponent {
+export class AddPersonModalComponent implements OnChanges {
   @Input() isOpen = false;
   @Output() close = new EventEmitter<void>();
   @Output() submit = new EventEmitter<PersonFormData>();
@@ -23,6 +23,10 @@ export class AddPersonModalComponent {
   };
 
   errors: { [key: string]: string } = {};
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['isOpen'] && !this.isOpen) this.resetForm();
+  }
 
   onClose(): void {
     this.resetForm();
@@ -48,7 +52,6 @@ export class AddPersonModalComponent {
     }
 
     this.submit.emit({ ...this.formData });
-    this.resetForm();
   }
 
   private resetForm(): void {
